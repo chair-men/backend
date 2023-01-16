@@ -21,10 +21,12 @@ router.get("/coords", async function (req, res, next) {
     return;
   }
   const locs = await getLocationFromPostalCode(req.query.postal);
-  if (locs == null) {
+  console.log(locs)
+  if (locs === null) {
     res.send({ error: "Invalid Postal Code" });
+  } else {
+    res.send({ lat: locs["LATITUDE"], lng: locs["LONGITUDE"] });
   }
-  res.send({ lat: locs["LATITUDE"], lng: locs["LONGITUDE"] });
 });
 
 module.exports = router;

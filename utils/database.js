@@ -103,6 +103,16 @@ const getVacantSlotsFromPPCode = async (ppcode) => {
   return formatSlotsData(data);
 };
 
+const getSlotFromLicensePlate = async (licenseplate) => {
+  const { data, error } = await supabase
+    .from("lots")
+    .select("*")
+    .match({ platenumber: licenseplate });
+    if (error)
+      return error;
+    return data[0];
+}
+
 // const getOccupiedSlotsFromPPCode = async (ppcode) => {
 //   const { data, error } = await supabase
 //     .from("cp_lots")
@@ -225,6 +235,7 @@ module.exports = {
   getSlotsfromPPCode,
   getLevelSlotsfromPPCode,
   getVacantSlotsFromPPCode,
+  getSlotFromLicensePlate,
   // getOccupiedSlotsFromPPCode,
   setOccupied,
   setVacant,

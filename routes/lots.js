@@ -4,6 +4,7 @@ var {
   getSlotsfromPPCode,
   getLevelSlotsfromPPCode,
   getVacantSlotsFromPPCode,
+  getSlotFromLicensePlate,
   // getOccupiedSlotsFromPPCode,
   isVacant,
   setOccupied,
@@ -103,6 +104,17 @@ router.post("/setlicenseplate", async function (req, res, next) {
     }
   }
 });
+
+router.get("/retrieveLot", async function (req, res, next) {
+  const { licenseplate } = req.query;
+  if (!licenseplate) {
+    res.send({ error: "Please add platenumber." });
+  } else {
+    const r = await getSlotFromLicensePlate(licenseplate);   
+    res.send(r);
+    console.log(r)
+  }
+})
 
 router.post("/feedback", async function (req, res, next) {
   const { id, image, kerb, paint, other, jobStatus, eta } = req.body;
