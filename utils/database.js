@@ -45,7 +45,8 @@ const formatLevelSlots = (data) => {
   const level = {};
   level.id = data[0].ppcode;
   level.level = data[0].lvl;
-  level.levels = { "1A": [], "1B": [], "2A": [], "2B": [] };
+  level.image_url = data[0].image_url;
+  level.data = [];
   data.sort((a, b) => a.lotnumber - b.lotnumber);
   for (var lot of data) {
     var c = {};
@@ -58,7 +59,7 @@ const formatLevelSlots = (data) => {
       [lot.tlx, lot.tly],
       [lot.brx, lot.bry],
     ];
-    level.levels[lot.lvl].push(c);
+    level.data.push(c);
   }
   return level;
 };
