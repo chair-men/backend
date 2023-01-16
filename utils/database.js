@@ -109,10 +109,9 @@ const getSlotFromLicensePlate = async (licenseplate) => {
     .from("lots")
     .select("*")
     .match({ platenumber: licenseplate });
-    if (error)
-      return error;
-    return data[0];
-}
+  if (error) return error;
+  return data[0];
+};
 
 const getOccupiedSlotsFromPPCode = async (ppcode) => {
   const { data, error } = await supabase
