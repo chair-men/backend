@@ -1,4 +1,5 @@
 const { uraAxios } = require("./axios");
+const axios = require("axios");
 
 const getToken = async () => {
   const token = await uraAxios({
@@ -18,4 +19,33 @@ const makeGetRequest = async (token, url) => {
   return response.data;
 };
 
-module.exports = { getToken, makeGetRequest };
+const getLocationFromPostalCode = async (postalCode) => {
+  const locationData = await axios.get(
+    `https://developers.onemap.sg/commonapi/search?searchVal=${postalCode}&returnGeom=Y&getAddrDetails=Y&pageNum=1`
+  );
+  if (locationData.data.found == 0) {
+    return null;
+  }
+  return locationData.data.results[0];
+};
+
+const getLocationsFromPostalCode = async (postalCode) => {
+  const locationData = await axios.get(
+    `https://developers.onemap.sg/commonapi/search?searchVal=${postalCode}&returnGeom=Y&getAddrDetails=Y&pageNum=1`
+  );
+  if (locationData.data.found == 0) {
+    return null;
+  }
+  // const ret = locationData.data.results.map((location) => {
+  //   return { lat: location.LATITUDE, lng: location.LONGITUDE };
+  // });
+  // return ret;
+  return locationData.data.results;
+};
+
+module.exports = {
+  getToken,
+  makeGetRequest,
+  getLocationFromPostalCode,
+  getLocationsFromPostalCode,
+};
