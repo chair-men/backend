@@ -8,6 +8,9 @@ var {
   isVacant,
   setOccupied,
   setVacant,
+  hasLicensePlate,
+  setLicensePlate,
+  giveFeedback,
 } = require("../utils/database");
 
 router.get("/", async function (req, res, next) {
@@ -24,7 +27,7 @@ router.get("/level", async function (req, res, next) {
   if (!ppcode || !level) {
     res.send({ error: "Please add ppcode and/or level as param" });
   } else {
-    const d = await getLevelSlotsfromPPCode(req.query.ppcode, level);
+    const d = await getLevelSlotsfromPPCode(ppcode, level);
     res.send(d);
   }
 });
@@ -50,9 +53,9 @@ router.get("/occupied", async function (req, res, next) {
 
 router.post("/occupy", async function (req, res, next) {
   const { id } = req.body;
-  if (!ppcode || !level || !lotnumber) {
+  if (!id) {
     res.send({
-      error: "Please add ppcode, level and/or lotnumber to body.",
+      error: "Please add id.",
     });
   } else {
     const o = await isVacant(id);
@@ -68,8 +71,8 @@ router.post("/occupy", async function (req, res, next) {
 
 router.post("/vacate", async function (req, res, next) {
   const { id } = req.body;
-  if (!ppcode || !level || !lotnumber) {
-    res.send({ error: "Please add ppcode, level and/or lotnumber to body." });
+  if (!id) {
+    res.send({ error: "Please add id." });
   } else {
     const o = await isVacant(id);
     if (o) {
@@ -79,6 +82,35 @@ router.post("/vacate", async function (req, res, next) {
     } else if ((await setVacant(id)) == 1) {
       res.sendStatus(200);
     }
+  }
+});
+
+router.post("/setlicenseplate", async function (req, res, next) {
+  const { id, platenumber } = req.body;
+  if (!id || !platenumber) {
+    res.send({ error: "Please add id and/or platenumber." });
+  } else {
+    const o = await isVacant(id);
+    const p = await hasLicensePlate(id);
+    if (!o && !p) {
+      await setLicensePlate(id, platenumber);
+      res.sendStatus(200);
+    } else {
+      res.send({ error: "There was a problem" });
+    }
+  }
+});
+
+router.post("/feedback", async function (req, res, next) {
+  const { id, image, kerb, paint, other, jobStatus, eta } = req.body;
+  const ob = { image, kerb, paint, other, jobStatus, eta };
+  const j = JSON.stringify(ob);
+  const r = await giveFeedback(id, j);
+  if (r == 1) {
+    res.send("OK");
+  } else {
+    console.log(r);
+    res.send(r);
   }
 });
 

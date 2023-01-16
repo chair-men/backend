@@ -1,10 +1,9 @@
 var express = require("express");
 var router = express.Router();
-var { getActualCarparks } = require("../utils/carpark");
-var { getLocationFromPostalCode } = require("../utils/helper");
+var { getLocationFromPostalCode, getToken } = require("../utils/helper");
+var { getAllCarparks } = require("../utils/database");
 var { getDistanceFromLatLonInKm, SVY21 } = require("../utils/distance");
 var { supabase } = require("../utils/database");
-const { getToken, getLocationsFromPostalCode } = require("../utils/helper");
 
 const layout1A = [
   { tl: [435.70799999999997, 715.8059999999999], br: [613.548, 804.726] },
@@ -154,111 +153,116 @@ const layout1B = [
 
 /* GET home page. */
 router.get("/", async function (req, res, next) {
-  const token = (await getToken())["Result"];
-  if (token) {
-    const result = (await getActualCarparks(token))["Result"];
-    // var x = [];
-    // console.log(result);
-    // for (var item of result) {
-    //   for (var i = 1; i <= 4; i++) {
-    //     for (var j = 31; j <= 40; j++) {
-    //       x.push({
-    //         ppcode: item.ppCode,
-    //         ppname: item.ppName,
-    //         level: `${Math.ceil(i / 2)}${i % 2 == 0 ? "A" : "B"}`,
-    //         lotnumber: j,
-    //         vacant: true,
-    //         platenumber: null,
-    //         tlx: parseFloat(
-    //           (i % 2 == 0
-    //             ? layout1A[j - 1]["tl"][0]
-    //             : layout1B[j - 1]["tl"][0]) / 3
-    //         ),
-    //         tly: parseFloat(
-    //           (i % 2 == 0
-    //             ? layout1A[j - 1]["tl"][1]
-    //             : layout1B[j - 1]["tl"][1]) / 3
-    //         ),
-    //         brx: parseFloat(
-    //           (i % 2 == 0
-    //             ? layout1A[j - 1]["br"][0]
-    //             : layout1B[j - 1]["br"][0]) / 3
-    //         ),
-    //         bry: parseFloat(
-    //           (i % 2 == 0
-    //             ? layout1A[j - 1]["br"][1]
-    //             : layout1B[j - 1]["br"][1]) / 3
-    //         ),
-    //       });
-    //     }
-    //   }
-    // }
-    // for (let item of result) {
-    //   for (var i = 1; i <= 4; i++) {
-    //     x.push({
-    //       carpark_id: item.ppCode,
-    //       image_url:
-    //         "https://gtkphlyjmplbzgehjapq.supabase.co/storage/v1/object/public/chair-men/layout1A.png?t=2023-01-16T09%3A57%3A35.502Z",
-    //       lvl: `${Math.ceil(i / 2)}${i % 2 == 0 ? "A" : "B"}`,
-    //     });
-    //   }
-    // }
-    // x = x.filter(
-    //   (value, index, self) =>
-    //     index ===
-    //     self.findIndex(
-    //       (t) =>
-    //         t.carpark_id === value.carpark_id &&
-    //         t.lvl === value.lvl &&
-    //         t.lotnumber == value.lotnumber
-    //     )
-    // );
-    // const { error } = await supabase.from("lots").insert(x);
-    // console.log(error);
-    res.send(result);
-  } else {
-    res.send("Please get your token.");
-  }
+  // console.log(result);
+  // for (var item of result) {
+  //   for (var i = 1; i <= 4; i++) {
+  //     for (var j = 31; j <= 40; j++) {
+  //       x.push({
+  //         ppcode: item.ppCode,
+  //         ppname: item.ppName,
+  //         level: `${Math.ceil(i / 2)}${i % 2 == 0 ? "A" : "B"}`,
+  //         lotnumber: j,
+  //         vacant: true,
+  //         platenumber: null,
+  //         tlx: parseFloat(
+  //           (i % 2 == 0
+  //             ? layout1A[j - 1]["tl"][0]
+  //             : layout1B[j - 1]["tl"][0]) / 3
+  //         ),
+  //         tly: parseFloat(
+  //           (i % 2 == 0
+  //             ? layout1A[j - 1]["tl"][1]
+  //             : layout1B[j - 1]["tl"][1]) / 3
+  //         ),
+  //         brx: parseFloat(
+  //           (i % 2 == 0
+  //             ? layout1A[j - 1]["br"][0]
+  //             : layout1B[j - 1]["br"][0]) / 3
+  //         ),
+  //         bry: parseFloat(
+  //           (i % 2 == 0
+  //             ? layout1A[j - 1]["br"][1]
+  //             : layout1B[j - 1]["br"][1]) / 3
+  //         ),
+  //       });
+  //     }
+  //   }
+  // }
+  // for (let item of result) {
+  //   for (var i = 1; i <= 4; i++) {
+  //     x.push({
+  //       carpark_id: item.ppCode,
+  //       image_url:
+  //         i % 2 == 1
+  //           ? "https://gtkphlyjmplbzgehjapq.supabase.co/storage/v1/object/public/chair-men/layout1A.png"
+  //           : "https://gtkphlyjmplbzgehjapq.supabase.co/storage/v1/object/public/chair-men/layout1B.png",
+  //       lvl: `${Math.ceil(i / 2)}${i % 2 == 1 ? "A" : "B"}`,
+  //     });
+  //   }
+  // }
+  // x = x.filter(
+  //   (value, index, self) =>
+  //     index ===
+  //     self.findIndex(
+  //       (t) =>
+  //         t.carpark_id === value.carpark_id &&
+  //         t.lvl === value.lvl &&
+  //         t.lotnumber == value.lotnumber
+  //     )
+  // );
+  // const { error } = await supabase.from("levels").insert(x);
+  // console.log(error);
+  const carparks = await getAllCarparks();
+  res.send(carparks);
 });
 
 router.get("/search", async function (req, res, next) {
-  const token = (await getToken())["Result"];
-  if (!req.query?.postal) {
+  const carparks = await getAllCarparks();
+  var lt, ln;
+
+  const { postal, coords } = req.query;
+  if (postal) {
+    const location = await getLocationFromPostalCode(req.query.postal);
+    console.log(location);
+    if (!location) {
+      res.send({ error: "Postal code is not working" });
+      return;
+    }
+    [lt, ln] = [location["LATITUDE"], location["LONGITUDE"]];
+  } else if (coords) {
+    [lt, ln] = coords.split(",");
+    if (!ln) {
+      res.send({ error: "Coords is not working" });
+      return;
+    }
+  }
+  if (lt == null) {
     res.send({ error: "Please add the postal query parameter." });
     return;
   }
-  const location = await getLocationFromPostalCode(req.query.postal);
-  if (location == null) {
-    res.send({ error: "Invalid Postal Code" });
-  }
-  const result = (await getActualCarparks(token))["Result"];
-  const [lt, ln] = [location["LATITUDE"], location["LONGITUDE"]];
-  const cv = new SVY21();
-  const retRes = result.filter((carpark, idx) => {
-    if (carpark == undefined || carpark.geometries.length == 0) {
+  const retRes = carparks.filter((carpark, idx) => {
+    if (carpark == undefined) {
       return false;
     }
-    const [N, E] = carpark.geometries[0]?.coordinates.split(",");
-    const { lat, lon } = cv.computeLatLon(parseFloat(E), parseFloat(N));
-    const distance = getDistanceFromLatLonInKm(lat, lon, lt, ln);
+    const distance = getDistanceFromLatLonInKm(
+      carpark.lat,
+      carpark.lng,
+      lt,
+      ln
+    );
     return distance < 5;
   });
   const x = retRes.map((carpark, idx) => {
-    const [N, E] = carpark.geometries[0]?.coordinates.split(",");
-    const { lat, lon } = cv.computeLatLon(parseFloat(E), parseFloat(N));
     return {
-      id: carpark.ppCode,
-      name: carpark.ppName,
+      id: carpark.carpark_id,
+      name: carpark.name,
       coordinates: {
-        lat,
-        lon,
+        lat: carpark.lat,
+        lng: carpark.lng,
       },
-      levels: [1, 2, 3],
     };
   });
   res.send(x);
 });
-
-router.get("/levels", async function (req, res, next) {});
 
 module.exports = router;

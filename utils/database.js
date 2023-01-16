@@ -9,15 +9,20 @@ const formatSlotsData = async (data) => {
   carpark.id = data[0].ppcode;
   carpark.name = data[0].ppname;
   carpark.coords = { lat: data[0].lat, lng: data[0].lng };
-  carpark.levels = [[], [], []];
+  carpark.levels = { "1A": [], "1B": [], "2A": [], "2B": [] };
   data.sort((a, b) => a.lotnumber - b.lotnumber);
   for (var lot of data) {
     var c = {};
     c.id = lot.id;
     c.vacant = lot.vacant;
     c.platenumber = lot.platenumber;
-    carpark.levels[lot.level - 1].push(c);
     c.lotnumber = lot.lotnumber;
+    c.feedback = lot.feedback;
+    c.coords = [
+      [lot.tlx, lot.tly],
+      [lot.brx, lot.bry],
+    ];
+    carpark.levels[lot.level].push(c);
   }
   return carpark;
 };
@@ -25,9 +30,8 @@ const formatSlotsData = async (data) => {
 const formatLevelSlots = (data) => {
   const level = {};
   level.id = data[0].ppcode;
-  level.level = data[0].level;
-  level.coords = { lat: data[0].lat, lng: data[0].lng };
-  level.lots = [];
+  level.level = data[0].lvl;
+  level.levels = { "1A": [], "1B": [], "2A": [], "2B": [] };
   data.sort((a, b) => a.lotnumber - b.lotnumber);
   for (var lot of data) {
     var c = {};
@@ -35,16 +39,29 @@ const formatLevelSlots = (data) => {
     c.vacant = lot.vacant;
     c.platenumber = lot.platenumber;
     c.lotnumber = lot.lotnumber;
-    level.lots.push(c);
+    c.feedback = lot.feedback;
+    c.coords = [
+      [lot.tlx, lot.tly],
+      [lot.brx, lot.bry],
+    ];
+    level.levels[lot.lvl].push(c);
   }
   return level;
+};
+
+const getAllCarparks = async () => {
+  const { data, error } = await supabase.from("carparks").select("*");
+  if (error) {
+    return error;
+  }
+  return data;
 };
 
 const getLevelSlotsfromPPCode = async (ppcode, level) => {
   const { data, error } = await supabase
     .from("lv_lots")
     .select("*")
-    .match({ ppcode, level });
+    .match({ ppcode, lvl: level });
   if (error) {
     return error;
   }
@@ -105,6 +122,17 @@ const setVacant = async (id) => {
   return 1;
 };
 
+const setLicensePlate = async (id, platenumber) => {
+  const { error } = await supabase
+    .from("lots")
+    .update({ platenumber: platenumber })
+    .match({ id });
+  if (error) {
+    return error;
+  }
+  return 1;
+};
+
 const isVacant = async (id) => {
   const { data, error } = await supabase.from("lots").select("*").match({ id });
   if (error) {
@@ -116,8 +144,44 @@ const isVacant = async (id) => {
   return data[0].vacant;
 };
 
+const hasLicensePlate = async (id) => {
+  const { data, error } = await supabase.from("lots").select("*").match({ id });
+  if (error) {
+    return error;
+  }
+  if (data.length == 0) {
+    return [];
+  }
+  return data[0].licenseplate;
+};
+
+const giveFeedback = async (id, feedback) => {
+  const { data, error: e } = await supabase
+    .from("lots")
+    .select("*")
+    .match({ id });
+  if (e) {
+    return e;
+  }
+  var ar = [];
+  if (data.feedback) {
+    ar = JSON.parse(data.feedback);
+  }
+  ar.push(feedback);
+  console.log(ar);
+  const { error } = await supabase
+    .from("lots")
+    .update({ feedback: ar })
+    .eq("id", id);
+  if (error) {
+    return error;
+  }
+  return 1;
+};
+
 module.exports = {
   supabase,
+  getAllCarparks,
   getSlotsfromPPCode,
   getLevelSlotsfromPPCode,
   getVacantSlotsFromPPCode,
@@ -125,4 +189,7 @@ module.exports = {
   setOccupied,
   setVacant,
   isVacant,
+  hasLicensePlate,
+  setLicensePlate,
+  giveFeedback,
 };

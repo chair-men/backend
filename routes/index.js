@@ -1,5 +1,5 @@
 var express = require("express");
-const { getToken, getLocationsFromPostalCode } = require("../utils/helper");
+const { getToken, getLocationFromPostalCode } = require("../utils/helper");
 var router = express.Router();
 
 /* GET home page. */
@@ -20,11 +20,11 @@ router.get("/coords", async function (req, res, next) {
     res.send({ error: "Please add the postal query parameter." });
     return;
   }
-  const locs = await getLocationsFromPostalCode(req.query.postal);
+  const locs = await getLocationFromPostalCode(req.query.postal);
   if (locs == null) {
     res.send({ error: "Invalid Postal Code" });
   }
-  res.send(locs);
+  res.send({ lat: locs["LATITUDE"], lng: locs["LONGITUDE"] });
 });
 
 module.exports = router;
