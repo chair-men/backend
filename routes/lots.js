@@ -4,7 +4,9 @@ var {
   getSlotsfromPPCode,
   getLevelSlotsfromPPCode,
   getVacantSlotsFromPPCode,
+  getSlotFromLicensePlate,
   // getOccupiedSlotsFromPPCode,
+  getOccupiedSlotsFromPPCode,
   isVacant,
   setOccupied,
   setVacant,
@@ -44,15 +46,15 @@ router.get("/vacant", async function (req, res, next) {
   }
 });
 
-// router.get("/occupied", async function (req, res, next) {
-//   const { ppcode } = req.query;
-//   if (!ppcode) {
-//     res.send({ error: "Please add ppcode as param" });
-//   } else {
-//     const d = await getOccupiedSlotsFromPPCode(ppcode);
-//     res.send(d);
-//   }
-// });
+router.get("/occupied", async function (req, res, next) {
+  const { ppcode } = req.query;
+  if (!ppcode) {
+    res.send({ error: "Please add ppcode as param" });
+  } else {
+    const d = await getOccupiedSlotsFromPPCode(ppcode);
+    res.send(d);
+  }
+});
 
 router.post("/occupy", async function (req, res, next) {
   const { id } = req.body;
@@ -103,6 +105,17 @@ router.post("/setlicenseplate", async function (req, res, next) {
     }
   }
 });
+
+router.get("/retrieveLot", async function (req, res, next) {
+  const { licenseplate } = req.query;
+  if (!licenseplate) {
+    res.send({ error: "Please add platenumber." });
+  } else {
+    const r = await getSlotFromLicensePlate(licenseplate);   
+    res.send(r);
+    console.log(r)
+  }
+})
 
 router.post("/feedback", async function (req, res, next) {
   const { id, image, kerb, paint, other, jobStatus, eta } = req.body;
