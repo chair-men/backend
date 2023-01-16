@@ -51,6 +51,8 @@ const formatLevelSlots = (data) => {
   for (var lot of data) {
     var c = {};
     c.id = lot.id;
+    c.carpark_id = lot.ppcode;
+    c.level = lot.lvl;
     c.vacant = lot.vacant;
     c.platenumber = lot.platenumber;
     c.lotnumber = lot.lotnumber;
