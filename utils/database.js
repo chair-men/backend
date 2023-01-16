@@ -159,16 +159,20 @@ const giveFeedback = async (id, feedback) => {
   const { data, error: e } = await supabase
     .from("lots")
     .select("*")
-    .match({ id });
+    .eq("id", id);
   if (e) {
     return e;
   }
   var ar = [];
-  if (data.feedback) {
-    ar = JSON.parse(data.feedback);
+  if (data[0]?.feedback) {
+    ar = data[0].feedback;
   }
   ar.push(feedback);
-  console.log(ar);
+  ar = ar.filter(
+    (value, index, self) =>
+      index ===
+      self.findIndex((t) => t.image === value.image && t.other === value.other)
+  );
   const { error } = await supabase
     .from("lots")
     .update({ feedback: ar })
@@ -177,6 +181,24 @@ const giveFeedback = async (id, feedback) => {
     return error;
   }
   return 1;
+};
+
+const getFeedback = async (id) => {
+  const { data, error: e } = await supabase
+    .from("lots")
+    .select("*")
+    .eq("id", id);
+  if (e) {
+    return e;
+  }
+  var ar = [];
+  if (data[0]?.feedback) {
+    ar = JSON.parse(JSON.stringify(data[0].feedback));
+    for (var i = 0; i < ar.length; i++) {
+      ar[i] = JSON.parse(ar[i]);
+    }
+  }
+  return ar;
 };
 
 module.exports = {
@@ -192,4 +214,5 @@ module.exports = {
   hasLicensePlate,
   setLicensePlate,
   giveFeedback,
+  getFeedback,
 };

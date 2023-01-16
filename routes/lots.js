@@ -11,6 +11,7 @@ var {
   hasLicensePlate,
   setLicensePlate,
   giveFeedback,
+  getFeedback,
 } = require("../utils/database");
 
 router.get("/", async function (req, res, next) {
@@ -109,8 +110,17 @@ router.post("/feedback", async function (req, res, next) {
   if (r == 1) {
     res.send("OK");
   } else {
-    console.log(r);
     res.send(r);
+  }
+});
+
+router.get("/retrievefeedback", async function (req, res, next) {
+  const { id } = req.query;
+  const r = await getFeedback(id);
+  if (r.length > 0) {
+    res.send(r);
+  } else {
+    res.send("There is no feedback");
   }
 });
 
