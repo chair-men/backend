@@ -171,7 +171,11 @@ const giveFeedback = async (id, feedback) => {
   ar = ar.filter(
     (value, index, self) =>
       index ===
-      self.findIndex((t) => t.image === value.image && t.other === value.other)
+      self.findIndex(
+        (t) =>
+          JSON.parse(t).image === JSON.parse(value).image &&
+          JSON.parse(t).other === JSON.parse(value).other
+      )
   );
   const { error } = await supabase
     .from("lots")
