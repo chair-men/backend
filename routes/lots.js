@@ -6,6 +6,7 @@ var {
   getVacantSlotsFromPPCode,
   getSlotFromLicensePlate,
   // getOccupiedSlotsFromPPCode,
+  getOccupiedSlotsFromPPCode,
   isVacant,
   setOccupied,
   setVacant,
@@ -45,15 +46,15 @@ router.get("/vacant", async function (req, res, next) {
   }
 });
 
-// router.get("/occupied", async function (req, res, next) {
-//   const { ppcode } = req.query;
-//   if (!ppcode) {
-//     res.send({ error: "Please add ppcode as param" });
-//   } else {
-//     const d = await getOccupiedSlotsFromPPCode(ppcode);
-//     res.send(d);
-//   }
-// });
+router.get("/occupied", async function (req, res, next) {
+  const { ppcode } = req.query;
+  if (!ppcode) {
+    res.send({ error: "Please add ppcode as param" });
+  } else {
+    const d = await getOccupiedSlotsFromPPCode(ppcode);
+    res.send(d);
+  }
+});
 
 router.post("/occupy", async function (req, res, next) {
   const { id } = req.body;

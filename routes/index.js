@@ -16,13 +16,13 @@ router.get("/token", async function (req, res, next) {
 });
 
 router.get("/coords", async function (req, res, next) {
-  if (!req.query?.postal) {
+  const {postal} = req.query;
+  if (!postal) {
     res.send({ error: "Please add the postal query parameter." });
     return;
   }
-  const locs = await getLocationFromPostalCode(req.query.postal);
-  console.log(locs)
-  if (locs === null) {
+  const locs = await getLocationFromPostalCode(postal);
+  if (locs == null) {
     res.send({ error: "Invalid Postal Code" });
   } else {
     res.send({ lat: locs["LATITUDE"], lng: locs["LONGITUDE"] });
