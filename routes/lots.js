@@ -4,7 +4,7 @@ var {
   getSlotsfromPPCode,
   getLevelSlotsfromPPCode,
   getVacantSlotsFromPPCode,
-  getOccupiedSlotsFromPPCode,
+  // getOccupiedSlotsFromPPCode,
   isVacant,
   setOccupied,
   setVacant,
@@ -35,22 +35,24 @@ router.get("/level", async function (req, res, next) {
 
 // Vacant and Occupied based on carpark code
 router.get("/vacant", async function (req, res, next) {
-  if (!req.query?.ppcode) {
+  const { ppcode } = req.query;
+  if (!ppcode) {
     res.send({ error: "Please add ppcode as param" });
   } else {
-    const d = await getVacantSlotsFromPPCode(req.query.ppcode);
+    const d = await getVacantSlotsFromPPCode(ppcode);
     res.send(d);
   }
 });
 
-router.get("/occupied", async function (req, res, next) {
-  if (!req.query?.ppcode) {
-    res.send({ error: "Please add ppcode as param" });
-  } else {
-    const d = await getOccupiedSlotsFromPPCode(req.query.ppcode);
-    res.send(d);
-  }
-});
+// router.get("/occupied", async function (req, res, next) {
+//   const { ppcode } = req.query;
+//   if (!ppcode) {
+//     res.send({ error: "Please add ppcode as param" });
+//   } else {
+//     const d = await getOccupiedSlotsFromPPCode(ppcode);
+//     res.send(d);
+//   }
+// });
 
 router.post("/occupy", async function (req, res, next) {
   const { id } = req.body;
@@ -117,11 +119,7 @@ router.post("/feedback", async function (req, res, next) {
 router.get("/retrievefeedback", async function (req, res, next) {
   const { id } = req.query;
   const r = await getFeedback(id);
-  if (r.length > 0) {
-    res.send(r);
-  } else {
-    res.send("There is no feedback");
-  }
+  res.send(r);
 });
 
 module.exports = router;

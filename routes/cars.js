@@ -260,6 +260,7 @@ router.get("/search", async function (req, res, next) {
         lat: carpark.lat,
         lng: carpark.lng,
       },
+      renovation: carpark.renovation,
     };
   });
   res.send(x);

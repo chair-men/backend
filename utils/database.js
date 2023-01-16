@@ -5,9 +5,13 @@ const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const formatSlotsData = async (data) => {
+  if (data.length == 0) {
+    return [];
+  }
   const carpark = {};
   carpark.id = data[0].ppcode;
   carpark.name = data[0].ppname;
+  carpark.renovation = data[0].renovation;
   carpark.coords = { lat: data[0].lat, lng: data[0].lng };
   carpark.levels = { "1A": [], "1B": [], "2A": [], "2B": [] };
   data.sort((a, b) => a.lotnumber - b.lotnumber);
@@ -24,10 +28,20 @@ const formatSlotsData = async (data) => {
     ];
     carpark.levels[lot.level].push(c);
   }
+  carpark.status = { "1A": {}, "1B": {}, "2A": {}, "2B": {} };
+  for (var k of Object.keys(carpark.status)) {
+    const count = 40;
+    carpark.status[k]["vacant"] = carpark.levels[k].length;
+    carpark.status[k]["occupied"] = count - carpark.levels[k].length;
+  }
+
   return carpark;
 };
 
 const formatLevelSlots = (data) => {
+  if (data.length == 0) {
+    return [];
+  }
   const level = {};
   level.id = data[0].ppcode;
   level.level = data[0].lvl;
@@ -89,16 +103,16 @@ const getVacantSlotsFromPPCode = async (ppcode) => {
   return formatSlotsData(data);
 };
 
-const getOccupiedSlotsFromPPCode = async (ppcode) => {
-  const { data, error } = await supabase
-    .from("cp_lots")
-    .select("*")
-    .match({ ppcode, vacant: false });
-  if (error) {
-    return error;
-  }
-  return formatSlotsData(data);
-};
+// const getOccupiedSlotsFromPPCode = async (ppcode) => {
+//   const { data, error } = await supabase
+//     .from("cp_lots")
+//     .select("*")
+//     .match({ ppcode, vacant: false });
+//   if (error) {
+//     return error;
+//   }
+//   return formatSlotsData(data);
+// };
 
 const setOccupied = async (id) => {
   const { error } = await supabase
@@ -211,7 +225,7 @@ module.exports = {
   getSlotsfromPPCode,
   getLevelSlotsfromPPCode,
   getVacantSlotsFromPPCode,
-  getOccupiedSlotsFromPPCode,
+  // getOccupiedSlotsFromPPCode,
   setOccupied,
   setVacant,
   isVacant,
