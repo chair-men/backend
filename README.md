@@ -15,5 +15,5 @@ Introducing “Park Me”, an all-in-one mobile application for public parking f
 3. Install dependencies using ```yarn``` or ```yarn install```
 4. Start the backend server using ```yarn start```
 
-## Note
+## Database
 The database is hosted [here](https://parkme.nghochi.xyz)
